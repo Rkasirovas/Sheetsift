@@ -1,0 +1,63 @@
+.success-message {
+    text-align: center;
+    padding: 40px 20px;
+}
+.success-message h2 {
+    color: #2ecc71;
+    margin-bottom: 20px;
+    font-size: 28px;
+}
+.success-message p {
+    font-size: 18px;
+    margin-bottom: 40px;
+    color: #333;
+}
+.success-message a {
+    text-decoration: none;
+}
+.success-message .upload-btn {
+    background-color: #2980c3;
+    color: white;
+    padding: 15px 30px;
+    font-size: 20px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.success-message .upload-btn:hover {
+    background-color: #1f2a3c;
+}
+.download-link {
+    font-size: 30px;
+    font-weight: bold;
+    color: #2980c3;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+.download-link:hover {
+    transform: scale(1.05);
+    color: #1f2a3c;
+}
+.bottom-button {
+    margin-top: 40px;
+}
+.upload-btn-link {
+    display: inline-block;
+    background-color: #2980c3;
+    color: white;
+    padding: 15px 30px;
+    font-size: 20px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-decoration: none;
+    font-weight: bold;
+}
+.upload-btn-link:hover {
+    background-color: #1f2a3c;
+}

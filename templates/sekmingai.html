@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="Excel data tool" content="Sheetsift, Excel, Data">
+    <title>Sheetsift – Sėkmingai</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='sekmingai.css') }}">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='sheetsift.png') }}" alt="Sheetsift logotipas" class="logo-img">
+    </header>
+    <div class="wrapper">
+        <div class="container">
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Pagrindinis</a></li>
+                    <li><a href="{{ url_for('apie') }}">Apie</a></li>
+                    <li><a href="{{ url_for('kontaktai') }}">Kontaktai</a></li>
+                </ul>
+            </nav>
+            <section class="success-message">
+                <h2>✅ Failas sėkmingai sukurtas!</h2>
+                <p>
+                    Jūsų įkeltas filtruoti Excel failas buvo sėkmingai apdorotas.<br>
+                </p>
+                <p>
+                    Jei paspausite žemiau <strong>"Atsisiųsti failą"</strong>, jis bus automatiškai išsiųstas į <strong>„Atsisiuntimai“</strong> arba <strong>„Downloads“</strong> aplanką.
+                </p>
+                <a href="{{ url_for('atsisiusti') }}" class="download-link">⬇️📁 Atsisiųsti failą</a>
+                <div class="bottom-button">
+                <a href="{{ url_for('index') }}" class="upload-btn-link">Grįžti į pradžią</a>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>
