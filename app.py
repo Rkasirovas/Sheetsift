@@ -51,44 +51,66 @@ def analyze_seb():
         df['MOKĖTOJO ARBA GAVĖJO PAVADINIMAS'] = df['MOKĖTOJO ARBA GAVĖJO PAVADINIMAS'].fillna('Nenurodytas')
         df['SĄSKAITA'] = df['SĄSKAITA'].fillna('Sąskaita nenurodyta')
         df['MOKĖJIMO PASKIRTIS'] = df['MOKĖJIMO PASKIRTIS'].fillna('Be paskirties')
+        df['SĄSKAITOS NR'] = df['SĄSKAITOS NR'].fillna('Sąskaita nenurodyta')
 
         credit_df = df[df['DEBETAS/KREDITAS'] == 'C']
-        credit_pivot = credit_df.pivot_table(index=['MOKĖTOJO ARBA GAVĖJO PAVADINIMAS', 'SĄSKAITA'],
+
+        credit_pivot = credit_df.pivot_table(index=['SĄSKAITOS NR', 'MOKĖTOJO ARBA GAVĖJO PAVADINIMAS', 'SĄSKAITA'],
                                              columns='METAI', values='SUMA', aggfunc='sum', fill_value=0).reset_index()
-        credit_reasons = credit_df.groupby(['MOKĖTOJO ARBA GAVĖJO PAVADINIMAS', 'SĄSKAITA'])['MOKĖJIMO PASKIRTIS'] \
-            .apply(lambda x: ' ||\n'.join(sorted(set(x)))).reset_index()
-        credit_final = pd.merge(credit_pivot, credit_reasons, on=['MOKĖTOJO ARBA GAVĖJO PAVADINIMAS', 'SĄSKAITA'])
+
+        credit_reasons = credit_df.groupby(['SĄSKAITOS NR', 'MOKĖTOJO ARBA GAVĖJO PAVADINIMAS', 'SĄSKAITA']) \
+            ['MOKĖJIMO PASKIRTIS'].apply(lambda x: ' ||\n'.join(sorted(set(x)))).reset_index()
+
+        credit_final = pd.merge(credit_pivot, credit_reasons,
+                                on=['SĄSKAITOS NR', 'MOKĖTOJO ARBA GAVĖJO PAVADINIMAS', 'SĄSKAITA'])
+
         credit_final = credit_final.rename(columns={
+            'SĄSKAITOS NR': 'ASMENS SĄSKAITA',
             'MOKĖTOJO ARBA GAVĖJO PAVADINIMAS': 'MOKĖTOJAS',
-            'MOKĖJIMO PASKIRTIS': 'PASKIRTIS'
+            'SĄSKAITA': 'MOKĖTOJO SĄSKAITA'
         })
 
         debit_df = df[df['DEBETAS/KREDITAS'] == 'D']
-        debit_pivot = debit_df.pivot_table(index=['MOKĖTOJO ARBA GAVĖJO PAVADINIMAS', 'SĄSKAITA'],
+
+        debit_pivot = debit_df.pivot_table(index=['SĄSKAITOS NR', 'MOKĖTOJO ARBA GAVĖJO PAVADINIMAS', 'SĄSKAITA'],
                                            columns='METAI', values='SUMA', aggfunc='sum', fill_value=0).reset_index()
-        debit_reasons = debit_df.groupby(['MOKĖTOJO ARBA GAVĖJO PAVADINIMAS', 'SĄSKAITA'])['MOKĖJIMO PASKIRTIS'] \
-            .apply(lambda x: ' ||\n'.join(sorted(set(x)))).reset_index()
-        debit_final = pd.merge(debit_pivot, debit_reasons, on=['MOKĖTOJO ARBA GAVĖJO PAVADINIMAS', 'SĄSKAITA'])
+
+        debit_reasons = debit_df.groupby(['SĄSKAITOS NR', 'MOKĖTOJO ARBA GAVĖJO PAVADINIMAS', 'SĄSKAITA']) \
+            ['MOKĖJIMO PASKIRTIS'].apply(lambda x: ' ||\n'.join(sorted(set(x)))).reset_index()
+
+        debit_final = pd.merge(debit_pivot, debit_reasons,
+                               on=['SĄSKAITOS NR', 'MOKĖTOJO ARBA GAVĖJO PAVADINIMAS', 'SĄSKAITA'])
+
         debit_final = debit_final.rename(columns={
+            'SĄSKAITOS NR': 'ASMENS SĄSKAITA',
             'MOKĖTOJO ARBA GAVĖJO PAVADINIMAS': 'GAVĖJAS',
-            'MOKĖJIMO PASKIRTIS': 'PASKIRTIS'
+            'SĄSKAITA': 'GAVĖJO SĄSKAITA'
         })
 
-        credit_summary = credit_df.groupby('METAI')['SUMA'].sum().reset_index().T
-        credit_summary.columns = credit_summary.iloc[0]
-        credit_summary = credit_summary.drop(index='METAI')
-        credit_summary.index = ['Bendros pajamos']
-        credit_summary['Viso'] = credit_summary.sum(axis=1)
+        all_years = sorted(df['METAI'].dropna().unique())
+        all_years = [int(y) for y in all_years if not pd.isna(y)]
 
-        debit_summary = debit_df.groupby('METAI')['SUMA'].sum().reset_index().T
-        debit_summary.columns = debit_summary.iloc[0]
-        debit_summary = debit_summary.drop(index='METAI')
-        debit_summary.index = ['Bendros išlaidos']
-        debit_summary['Viso'] = debit_summary.sum(axis=1)
+        summary_list = []
 
-        summary_combined = pd.concat([credit_summary, debit_summary])
+        for account in df['SĄSKAITOS NR'].dropna().unique():
+            account_credit = credit_df[credit_df['SĄSKAITOS NR'] == account]
+            account_debit = debit_df[debit_df['SĄSKAITOS NR'] == account]
 
-        # Išsaugome į vieną Excel failą
+            credit_summary = account_credit.groupby('METAI')['SUMA'].sum()
+            debit_summary = account_debit.groupby('METAI')['SUMA'].sum()
+            credit_row = [credit_summary.get(year, 0) for year in all_years]
+            debit_row = [debit_summary.get(year, 0) for year in all_years]
+            credit_total = sum(credit_row)
+            debit_total = sum(debit_row)
+            credit_df_row = pd.DataFrame([credit_row + [credit_total]], columns=all_years + ['Viso'],
+                                         index=[f'{account} Bendros Pajamos'])
+            debit_df_row = pd.DataFrame([debit_row + [debit_total]], columns=all_years + ['Viso'],
+                                        index=[f'{account} Bendros Išlaidos'])
+            summary_list.append(credit_df_row)
+            summary_list.append(debit_df_row)
+
+        summary_combined = pd.concat(summary_list)
+
         result_path = os.path.join(app.config['RESULT_FOLDER'], 'Apdoroti_Israsai.xlsx')
         with pd.ExcelWriter(result_path, engine='xlsxwriter') as writer:
             credit_final.to_excel(writer, sheet_name='Pajamos', index=False)
