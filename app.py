@@ -34,8 +34,10 @@ def analyze():
     bank = request.form.get('bank')
     if bank == 'seb':
         return analyze_seb()
-    # elif bank == 'swedbank':
-    #     return analyze_swedbank()
+    elif bank == 'swedbank':
+        return analyze_swedbank()
+    # elif bank == 'siauliubankas':
+    #     return analyze_siauliubankas()
     else:
         return "Pasirinktas bankas šiuo metu nepalaikomas!", 400
 
@@ -120,6 +122,18 @@ def analyze_seb():
         return redirect(url_for('sekmingai'))
 
     return "KLAIDA: Neteisingas failo formatas. Bandykite dar kartą!", 400
+
+
+def analyze_swedbank():
+    file = request.files['file']
+    if file and file.filename.endswith('.xlsx'):
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(filepath)
+
+        df = pd.read_excel(filepath)
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
