@@ -1,0 +1,31 @@
+.error-message {
+    text-align: center;
+    padding: 40px 20px;
+}
+.error-message h2 {
+    color: #e74c3c;
+    margin-bottom: 20px;
+    font-size: 28px;
+}
+.error-message p {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #333;
+}
+.upload-btn-link {
+    display: inline-block;
+    background-color: #2980c3;
+    color: white;
+    padding: 15px 30px;
+    font-size: 20px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: 30px;
+}
+.upload-btn-link:hover {
+    background-color: #1f2a3c;
+}
