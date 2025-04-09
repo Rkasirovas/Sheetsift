@@ -1,0 +1,16 @@
+.contacts-section {
+    padding: 0 10px;
+    max-width: 100%;
+}
+.contacts-section h2 {
+    color: #2a86c0;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+.contacts-section p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 15px;
+}

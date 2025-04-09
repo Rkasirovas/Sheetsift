@@ -9,24 +9,8 @@
 }
 .success-message p {
     font-size: 18px;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
     color: #333;
-}
-.success-message a {
-    text-decoration: none;
-}
-.success-message .upload-btn {
-    background-color: #2980c3;
-    color: white;
-    padding: 15px 30px;
-    font-size: 20px;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-.success-message .upload-btn:hover {
-    background-color: #1f2a3c;
 }
 .download-link {
     font-size: 30px;
@@ -42,11 +26,9 @@
     transform: scale(1.05);
     color: #1f2a3c;
 }
-.bottom-button {
-    margin-top: 50px;
-}
 .upload-btn-link {
     display: inline-block;
+    margin-top: 40px;
     background-color: #2980c3;
     color: white;
     padding: 15px 30px;
@@ -54,9 +36,9 @@
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    transition: background-color 0.3s;
     text-decoration: none;
     font-weight: bold;
+    transition: background-color 0.3s;
 }
 .upload-btn-link:hover {
     background-color: #1f2a3c;

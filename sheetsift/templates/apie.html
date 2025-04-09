@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Apie – Sheetsift{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='apie.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="apie-section">
+    <h2>Kas yra Sheetsift?</h2>
+    <p>
+        Sheetsift – tai paprastas, bet galingas įrankis, skirtas greitam Excel (.xlsx) failų iš Lietuvos bankų apdorojimui ir duomenų filtravimui.
+    </p>
+    <h3>Kokios galimybės?</h3>
+    <ul>
+        <li>Įkelkite sąskaitos išrašą iš Swedbank, SEB, Luminor, Citadele, Revolut, Paysera ar Šiaulių banko.</li>
+        <li>Automatiškai aptinkama struktūra ir pritaikytas formatas pagal konkretų banką.</li>
+        <li>Galimybė išfiltruoti bankines operacijas pagal datą, sumą, aprašymą ar kitus kriterijus.</li>
+        <li>Patogi ir aiški vartotojo sąsaja.</li>
+    </ul>
+    <h3>Nauda vartotojui:</h3>
+    <ul>
+        <li>Sutaupytas laikas rankiniam duomenų rūšiavimui.</li>
+        <li>Galimybė greitai analizuoti savo finansus.</li>
+        <li>Nereikia jokių papildomų programų – viskas veikia naršyklėje.</li>
+    </ul>
+</section>
+{% endblock %}
+

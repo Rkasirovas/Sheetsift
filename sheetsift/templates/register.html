@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Registruotis - Sheetsift{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-form">
+    <h2>Registruotis</h2>
+    <form method="POST">
+        <input type="text" name="username" placeholder="Vartotojo vardas" required>
+        <input type="password" name="password" placeholder="Slaptažodis" required>
+        <button type="submit">Registruotis</button>
+    </form>
+    <p>Jau turite paskyrą? <a href="{{ url_for('auth.login') }}">Prisijungti</a></p>
+</div>
+{% endblock %}
+

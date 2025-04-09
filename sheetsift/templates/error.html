@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Klaida - Sheetsift{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='error.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="error-message">
+    <h2>⚠️ Įvyko klaida</h2>
+    <p>Panašu, kad įkeltas failas neatitinka .xlsx formato arba pasirinkto banko formato.</p>
+    <p>Įsitikinkite, kad pasirinkote tinkamą .xlsx formatą ir banką, iš kurio yra gautas išrašas.</p>
+    <a href="{{ url_for('main.index') }}" class="upload-btn-link">Grįžti į pradžią</a>
+</section>
+{% endblock %}
+

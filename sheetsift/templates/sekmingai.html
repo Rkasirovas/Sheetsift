@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Sėkmingai – Sheetsift{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='sekmingai.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="success-message">
+    <h2>✅ Failas sėkmingai sukurtas!</h2>
+    <p>
+        Jūsų įkeltas filtruoti Excel failas buvo sėkmingai apdorotas.<br>
+    </p>
+    <p>
+        Jei paspausite žemiau <strong>"Atsisiųsti failą"</strong>, jis bus automatiškai išsiųstas į
+        <strong>„Atsisiuntimai“</strong> arba <strong>„Downloads“</strong> aplanką.
+    </p>
+    <a href="{{ url_for('main.atsisiusti') }}" class="download-link">⬇️📁 Atsisiųsti failą</a>
+    <div class="bottom-button">
+        <a href="{{ url_for('main.index') }}" class="upload-btn-link">Grįžti į pradžią</a>
+    </div>
+</section>
+{% endblock %}
+
