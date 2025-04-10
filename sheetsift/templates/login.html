@@ -9,12 +9,19 @@
 {% block content %}
 <div class="auth-form">
     <h2>Prisijungti</h2>
+
+    {% if message %}
+        <div class="custom-message error">{{ message }}</div>
+    {% endif %}
+
     <form method="POST">
         <input type="text" name="username" placeholder="Vartotojo vardas" required>
         <input type="password" name="password" placeholder="Slaptažodis" required>
         <button type="submit">Prisijungti</button>
     </form>
+
     <p>Neturite paskyros? <a href="{{ url_for('auth.register') }}">Registruotis</a></p>
 </div>
 {% endblock %}
+
 
