@@ -10,6 +10,9 @@
 <div class="auth-form">
     <h2>Prisijungti</h2>
 
+    {% if success_message %}
+        <div class="custom-message success">{{ success_message }}</div>
+    {% endif %}
     {% if message %}
         <div class="custom-message error">{{ message }}</div>
     {% endif %}
