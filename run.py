@@ -15,5 +15,4 @@ if __name__ == '__main__':
     with app.app_context():
         if not os.path.exists(os.path.join(BASE_DIR, 'app.db')):
             db.create_all()
-            print("✅ Sukurtas app.db")
     app.run(debug=True)

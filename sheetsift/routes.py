@@ -12,22 +12,27 @@ def index():
     return render_template('index.html')
 
 @main.route('/apie')
+@login_required
 def apie():
     return render_template('apie.html')
 
 @main.route('/kontaktai')
+@login_required
 def kontaktai():
     return render_template('kontaktai.html')
 
 @main.route('/sekmingai')
+@login_required
 def sekmingai():
     return render_template('sekmingai.html')
 
 @main.route('/error')
+@login_required
 def klaida():
     return render_template('error.html')
 
 @main.route('/sekmingai/atsisiusti')
+@login_required
 def atsisiusti():
     file_path = session.get('last_file')
     if file_path and os.path.exists(file_path):
@@ -35,6 +40,7 @@ def atsisiusti():
     return redirect(url_for('main.klaida'))
 
 @main.route('/analyze', methods=['POST'])
+@login_required
 def analyze():
     bank = request.form.get('bank')
     if bank == 'seb':

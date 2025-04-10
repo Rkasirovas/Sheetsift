@@ -34,10 +34,12 @@ header {
     margin: -10px auto 0 auto;
 }
 .user-greeting {
-    text-align: right;
-    margin: 15px 40px 0 0;
-    font-weight: bold;
+    position: absolute;
+    top: 15px;
+    right: 30px;
     color: #2980c3;
+    font-weight: bold;
+    font-size: 16px;
 }
 .main-nav {
     background-color: #2980c3;
