@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, request, send_file, session, redirect, url_for
+from flask import Blueprint, render_template, request, send_file, session, redirect, url_for, current_app
 from .filters.seb import analyze_seb
 from .filters.swedbank import analyze_swedbank
 from flask_login import login_required
 import os
+from .utils import cleanup_temp_files
 
 main = Blueprint('main', __name__)
 
@@ -49,3 +50,14 @@ def analyze():
         return analyze_swedbank()
     else:
         return render_template('error.html')
+
+@main.route('/clean_up')
+@login_required
+def clean_up():
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+    result_folder = current_app.config['RESULT_FOLDER']
+
+    cleanup_temp_files(upload_folder, result_folder)
+    session.pop('last_file', None)
+
+    return redirect(url_for('main.index'))

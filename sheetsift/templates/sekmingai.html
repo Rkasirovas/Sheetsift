@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='sekmingai.css') }}">
 {% endblock %}
 
+{% set hide_nav = true %}
 {% block content %}
 <section class="success-message">
     <h2>✅ Failas sėkmingai sukurtas!</h2>
@@ -18,7 +19,7 @@
     </p>
     <a href="{{ url_for('main.atsisiusti') }}" class="download-link">⬇️📁 Atsisiųsti failą</a>
     <div class="bottom-button">
-        <a href="{{ url_for('main.index') }}" class="upload-btn-link">Grįžti į pradžią</a>
+        <a href="{{ url_for('main.clean_up') }}" class="upload-btn-link">Grįžti į pradžią</a>
     </div>
 </section>
 {% endblock %}
