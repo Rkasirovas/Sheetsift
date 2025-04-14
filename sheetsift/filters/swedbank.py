@@ -18,7 +18,6 @@ def analyze_swedbank():
                 'Sąskaitos Nr.',
                 'Detalės',
                 'Operacijos tipas',
-                'Suma'
             ]
 
             if not all(col in df.columns for col in required_columns):
@@ -32,8 +31,9 @@ def analyze_swedbank():
 
             credit_df = df[df['Operacijos tipas'] == 'įplaukos']
 
-            credit_pivot = credit_df.pivot_table(index=['Sąskaitos Nr.', 'Gavėjas / Siuntėjas', 'Gavėjo / Siuntėjo sąskaitos nr.'],
-                                                 columns='METAI', values='Suma', aggfunc='sum', fill_value=0).reset_index()
+            credit_pivot = credit_df.pivot_table(
+                index=['Sąskaitos Nr.', 'Gavėjas / Siuntėjas', 'Gavėjo / Siuntėjo sąskaitos nr.'],
+                columns='METAI', values='Suma', aggfunc='sum', fill_value=0).reset_index()
 
             credit_reasons = credit_df.groupby(['Sąskaitos Nr.', 'Gavėjas / Siuntėjas', 'Gavėjo / Siuntėjo sąskaitos nr.']) \
                 ['Detalės'].apply(lambda x: ' ||\n'.join(sorted(set(x)))).reset_index()
@@ -51,8 +51,9 @@ def analyze_swedbank():
             debit_df = df[df['Operacijos tipas'] == 'išlaidos']
             debit_df['Suma'] = debit_df['Suma'].abs()
 
-            debit_pivot = debit_df.pivot_table(index=['Sąskaitos Nr.', 'Gavėjas / Siuntėjas', 'Gavėjo / Siuntėjo sąskaitos nr.'],
-                                                columns='METAI', values='Suma', aggfunc='sum', fill_value=0).reset_index()
+            debit_pivot = debit_df.pivot_table(
+                index=['Sąskaitos Nr.', 'Gavėjas / Siuntėjas', 'Gavėjo / Siuntėjo sąskaitos nr.'],
+                columns='METAI', values='Suma', aggfunc='sum', fill_value=0).reset_index()
 
             debit_reasons = debit_df.groupby(['Sąskaitos Nr.', 'Gavėjas / Siuntėjas', 'Gavėjo / Siuntėjo sąskaitos nr.']) \
                 ['Detalės'].apply(lambda x: ' ||\n'.join(sorted(set(x)))).reset_index()

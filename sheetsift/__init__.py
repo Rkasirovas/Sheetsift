@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, request
+from flask import Flask, redirect, url_for, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_bcrypt import Bcrypt
@@ -13,6 +13,9 @@ admin = Admin(name='Admin', template_mode='bootstrap4')
 
 login_manager.login_view = 'auth.login'
 login_manager.login_message_category = 'info'
+
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -54,5 +57,7 @@ def create_app(config=None):
 
     app.register_blueprint(main)
     app.register_blueprint(auth)
+
+    app.register_error_handler(404, page_not_found)
 
     return app

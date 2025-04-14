@@ -1,12 +1,12 @@
 import pandas as pd
 import os
-from flask import request, redirect, url_for, current_app as app, session
+from flask import request, redirect, url_for, current_app, session
 
 def analyze_seb():
     file = request.files['file']
     if file and file.filename.endswith('.xlsx'):
         try:
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
             file.save(filepath)
 
             df = pd.read_excel(filepath)
@@ -89,14 +89,13 @@ def analyze_seb():
 
             summary_combined = pd.concat(summary_list)
 
-            result_path = os.path.join(app.config['RESULT_FOLDER'], 'Apdoroti_Išrasai_SEB.xlsx')
+            result_path = os.path.join(current_app.config['RESULT_FOLDER'], 'Apdoroti_Išrasai_SEB.xlsx')
             with pd.ExcelWriter(result_path, engine='xlsxwriter') as writer:
                 credit_final.to_excel(writer, sheet_name='Pajamos', index=False)
                 debit_final.to_excel(writer, sheet_name='Išlaidos', index=False)
                 summary_combined.to_excel(writer, sheet_name='Bendra')
 
             session['last_file'] = result_path
-
             return redirect(url_for('main.sekmingai'))
 
         except Exception as e:

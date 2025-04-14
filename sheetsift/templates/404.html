@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}404 Klaida - Puslapis nerastas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='error404.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <h1>404</h1>
+    <p>Oi! Atrodo, šis puslapis neegzistuoja.</p>
+    <a class="upload-btn-link" href="{{ url_for('main.index') }}">Grįžti į pagrindinį</a>
+</div>
+{% endblock %}
