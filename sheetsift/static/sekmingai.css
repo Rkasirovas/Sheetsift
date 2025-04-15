@@ -1,11 +1,11 @@
 .main-nav {
     background-color: #2980c3;
     text-align: center;
-    padding: 15px;
+    padding: 20px;
     border-radius: 10px;
     margin-bottom: 30px;
     margin: -10px -60px 30px -60px;
-    min-height: 50px;
+    min-height: 52px;
 }
 .success-message {
     text-align: center;

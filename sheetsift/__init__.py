@@ -9,7 +9,11 @@ from wtforms import PasswordField
 db = SQLAlchemy()
 login_manager = LoginManager()
 bcrypt = Bcrypt()
-admin = Admin(name='Admin', template_mode='bootstrap4')
+admin = Admin(
+    name='Monty_Wizard_Python',
+    url='/montywizardpython',
+    template_mode='bootstrap4'
+)
 
 login_manager.login_view = 'auth.login'
 login_manager.login_message_category = 'info'
@@ -33,7 +37,7 @@ def create_app(config=None):
 
     class AdminAccessView(ModelView):
         def is_accessible(self):
-            return current_user.is_authenticated and current_user.username == 'admin'
+            return current_user.is_authenticated and current_user.username == 'Monty_Wizard_Python'
 
         def inaccessible_callback(self, name, **kwargs):
             return redirect(url_for('auth.login', next=request.url))
