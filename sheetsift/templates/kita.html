@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Kita{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='kita.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="info-section">
+    <h2>🔒 Duomenų saugumas</h2>
+    <p>
+        Sheetsift veikia kaip laikinas bankinių duomenų analizės įrankis. Sistema skirta tik failų
+        apdorojimui naršyklėje – jokie įkelti ar sugeneruoti duomenys nėra saugomi ilgiau nei būtina.
+    </p>
+    <p>
+        Kai tik įkeltas Excel (.xlsx) failas yra prafiltruotas ir pateikiamas parsisiųsti, visi
+        susiję duomenys (tiek įkelti, tiek sugeneruoti) <strong>automatiškai ištrinami</strong> iš serverio.
+    </p>
+    <p>
+        Sheetsift neturi prieigos prie jūsų banko – dirbama tik su failais, kuriuos jūs patys pateikiate.
+        Duomenys nėra saugomi jokioje duomenų bazėje ar serveriuose.
+    </p>
+    <p style="margin-top: 30px; font-weight: bold;">
+        ✅ Jūsų duomenų privatumas – mūsų prioritetas.
+    </p>
+</section>
+{% endblock %}

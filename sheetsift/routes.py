@@ -1,26 +1,37 @@
 from flask import Blueprint, render_template, request, send_file, session, redirect, url_for, current_app
 from .filters.seb import analyze_seb
 from .filters.swedbank import analyze_swedbank
-from flask_login import login_required
+from flask_login import login_required, current_user
 import os
 from .utils import cleanup_temp_files
 
 main = Blueprint('main', __name__)
+
+@main.route('/apie')
+def apie():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    return render_template('apie.html')
 
 @main.route('/')
 @login_required
 def index():
     return render_template('index.html')
 
-@main.route('/apie')
+@main.route('/naudojimas')
 @login_required
-def apie():
-    return render_template('apie.html')
+def naudojimas():
+    return render_template('naudojimas.html')
 
 @main.route('/kontaktai')
 @login_required
 def kontaktai():
     return render_template('kontaktai.html')
+
+@main.route('/kita')
+@login_required
+def kita():
+    return render_template('kita.html')
 
 @main.route('/sekmingai')
 @login_required

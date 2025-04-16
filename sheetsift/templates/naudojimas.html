@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Naudojimas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='apie.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="apie-section">
+    <h2>Kaip naudotis Sheetsift?</h2>
+    <p>
+        Norint tinkamai naudotis šia banko išrašų filtravimo programa, jums reikės oficialaus Excel (.xlsx) formato sąskaitos išrašo vieno iš šių bankų: Swedbank, SEB, Luminor, Citadele, Revolut, Paysera arba Šiaulių bankas.
+    </p>
+    <h3>Kad sistema atpažintų duomenis ir pritaikytų tinkamą filtravimo algoritmą, įsitikinkite, kad:</h3>
+    <ul>
+        <li>Excel faile <strong>pagrindiniai stulpeliai (antraštės)</strong> yra <strong>pirmoje eilutėje (1 row)</strong>.</li>
+        <li>Visi duomenys yra <strong>viename lape (sheet'e)</strong>.</li>
+        <li>Failas yra neiškarpytas ir nėra papildomų viršutinių eilučių ar sujungtų langelių.</li>
+    </ul>
+    <h3>Tinkamai paruošus failą, tereikia jį įkelti ir paspausti "Filtruoti" – visa kita atliks Sheetsift 🚀</h3>
+</section>
+{% endblock %}
