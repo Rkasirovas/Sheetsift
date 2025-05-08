@@ -1,9 +1,8 @@
-from flask import Flask, redirect, url_for, request, render_template
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from flask_admin import Admin
-
 
 db = SQLAlchemy()
 login_manager = LoginManager()

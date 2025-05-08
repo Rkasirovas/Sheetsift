@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, send_file, session, redirect, url_for, current_app
 from .filters.seb import analyze_seb
 from .filters.swedbank import analyze_swedbank
+from .filters.luminor import analyze_luminor
 from flask_login import login_required, current_user
 import os
 from .utils import cleanup_temp_files
@@ -59,6 +60,8 @@ def analyze():
         return analyze_seb()
     elif bank == 'swedbank':
         return analyze_swedbank()
+    elif bank == 'luminor':
+        return analyze_luminor()
     else:
         return render_template('error.html')
 
