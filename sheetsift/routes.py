@@ -3,6 +3,7 @@ from .filters.seb import analyze_seb
 from .filters.swedbank import analyze_swedbank
 from .filters.luminor import analyze_luminor
 from .filters.citadele import analyze_citadele
+from .filters.paysera import analyze_paysera
 from flask_login import login_required, current_user
 import os
 from .utils import cleanup_temp_files
@@ -65,6 +66,8 @@ def analyze():
         return analyze_luminor()
     elif bank == 'citadele':
         return analyze_citadele()
+    elif bank == 'paysera':
+        return analyze_paysera()
     else:
         return render_template('error.html')
 
