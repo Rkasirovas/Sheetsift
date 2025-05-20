@@ -2,6 +2,8 @@
 
 SheetSift is a web application built with Python (Flask), designed to allow users to upload, process, and manage spreadsheet files with user authentication and admin features. It leverages a modular architecture and uses SQLAlchemy for database management.
 
+![Main Index Page](index.png)
+
 ## Features
 
 - **User Authentication:** Secure login system with Flask-Login and bcrypt password hashing.
