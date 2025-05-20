@@ -1,6 +1,6 @@
 # Final Project: SheetSift
 
-SheetSift is a web application built with Python (Flask), designed to allow users to upload, process, and manage spreadsheet files with user authentication and admin features. It leverages a modular architecture and uses SQLAlchemy for database management.
+SheetSift is a web application built with Python (Flask), designed to allow users to upload, process, and manage different bank statements spreadsheet files with user authentication and admin features. It leverages a modular architecture and uses SQLAlchemy for database management.
 
 ![Main Index Page](index.png)
 
@@ -8,7 +8,7 @@ SheetSift is a web application built with Python (Flask), designed to allow user
 
 - **User Authentication:** Secure login system with Flask-Login and bcrypt password hashing.
 - **Admin Interface:** Admin panel powered by Flask-Admin for managing users.
-- **File Uploads:** Upload and process spreadsheet files (e.g., XLSX, CSV).
+- **File Uploads:** Upload and process spreadsheet files (XLSX).
 - **Custom Filtering:** Extendable filtering logic for uploaded data (see `sheetsift/filters/`).
 - **Database Support:** Uses SQLite by default, easy to swap for other databases via SQLAlchemy.
 - **Error Handling:** Custom 404 error page.
@@ -80,7 +80,7 @@ All major configuration options (upload folders, DB URI, etc.) are set in `run.p
 ## Folder Descriptions
 
 - **sheetsift/filters/**: Place your custom spreadsheet filters here.
-- **sheetsift/static/**: Static files (CSS, JS, images) for the frontend.
+- **sheetsift/static/**: Static files (CSS, images) for the frontend.
 - **sheetsift/templates/**: All HTML templates (including `404.html`).
 
 ## Development
