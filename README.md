@@ -85,10 +85,4 @@ All major configuration options (upload folders, DB URI, etc.) are set in `run.p
 - The app runs in debug mode by default.
 - Extend models or add filters by editing files in `sheetsift/`.
 
-## License
-
-[MIT License](LICENSE)  <!-- Update if you use a different license -->
-
----
-
 *This project was created as a final assignment by [Rkasirovas](https://github.com/Rkasirovas).*
