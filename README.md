@@ -23,8 +23,9 @@ sheetsift/
   models.py                   # Database models (User, etc.)
   routes.py                   # Main application routes
   auth.py                     # Authentication-related routes
+  utils.py                    # Function for cleaning up uploaded and created files
   filters/                    # Custom filtering logic for spreadsheets
-  static/                     # Static files (CSS, JS, images)
+  static/                     # Static files (CSS, images)
   templates/                  # HTML templates
 ```
 
