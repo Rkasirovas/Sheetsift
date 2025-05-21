@@ -15,7 +15,7 @@ def analyze_citadele():
 
             selection = None
 
-            if 'Account Nr' in columns:
+            if 'Account Nr' and 'Correspondent' and 'Details' in columns:
                 selection = 'en_account'
                 df["METAI"] = pd.to_datetime(df["Date"], errors="coerce").dt.year
                 df['ASMENS SĄSKAITA'] = df['Account Nr']
@@ -25,7 +25,7 @@ def analyze_citadele():
                 df['IŠLAIDOS'] = df['Debit in transaction currency'].fillna(0)
                 df = df[['METAI', 'ASMENS SĄSKAITA', 'MOKĖTOJAS/GAVĖJAS', 'MOKĖJIMO PASKIRTIS', 'PAJAMOS', 'IŠLAIDOS']]
 
-            elif 'IBAN' in columns:
+            elif 'IBAN' and 'OFS.AMOUNT' and 'OFS.NARRATIVE' in columns:
                 selection = 'en_iban'
                 df["METAI"] = pd.to_datetime(df["OFS.DATE"].astype(str), format='%Y%m%d', errors='coerce').dt.year
                 df['ASMENS SĄSKAITA'] = df['IBAN']
@@ -35,7 +35,7 @@ def analyze_citadele():
                 df['IŠLAIDOS'] = df.apply(lambda x: abs(x['OFS.AMOUNT']) if x['SIGN'] == 'DR' else 0, axis=1)
                 df = df[['METAI', 'ASMENS SĄSKAITA', 'MOKĖTOJAS/GAVĖJAS', 'MOKĖJIMO PASKIRTIS', 'PAJAMOS', 'IŠLAIDOS']]
 
-            elif 'Data' in columns and 'DR' in columns and 'CR' in columns:
+            elif 'Data' and 'DR' and 'CR' in columns:
                 selection = 'lt'
 
                 def fix_date(x):

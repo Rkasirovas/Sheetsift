@@ -12,7 +12,7 @@ def analyze_revolut():
             df = pd.read_excel(filepath)
             columns = df.columns
 
-            if 'Counterparty Name' in columns and 'Counterparty Account Nbr' in columns:
+            if 'Counterparty Name' and 'Counterparty Account Nbr' in columns:
                 df["METAI"] = pd.to_datetime(df["Started Date"], errors="coerce").dt.year
                 df['Mokėtojas/Gavėjas'] = df['Counterparty Name'].fillna('Nenurodytas')
                 df['Mokėtojo/Gavėjo sąskaitos numeris'] = df['Counterparty Account Nbr'].fillna('Sąskaita nenurodyta')
@@ -53,7 +53,7 @@ def analyze_revolut():
                     'Mokėtojo/Gavėjo sąskaitos numeris': 'GAVĖJO SĄSKAITA'
                 })
 
-            elif all(col in columns for col in ['Started Date', 'Description', 'Amount', 'Type', 'Currency']):
+            elif all(col in columns for col in ['Started Date', 'Description', 'Amount']):
                 df["METAI"] = pd.to_datetime(df["Started Date"], errors="coerce").dt.year
                 df['Description'] = df['Description'].fillna('Be paskirties')
                 df['Amount'] = pd.to_numeric(df['Amount'], errors='coerce').fillna(0)
