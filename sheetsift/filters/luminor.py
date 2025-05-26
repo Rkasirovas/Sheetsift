@@ -14,7 +14,7 @@ def analyze_luminor():
             required_columns = [
                 'Operacijos data',
                 'Mokėjimo paskirtis',
-                'Mokėtojas / Gavėjas',
+                'Mokėtojas /\nGavėjas',
                 'Mokėtojo / Gavėjo sąskaitos numeris, paslaugų teikėjo pavadinimas ir kodas',
                 'Suma nac. valiuta (debetas)',
                 'Suma nac. valiuta (kreditas)',
@@ -24,7 +24,7 @@ def analyze_luminor():
                 return redirect(url_for('main.klaida'))
 
             df["METAI"] = pd.to_datetime(df["Operacijos data"], errors="coerce").dt.year
-            df['Mokėtojas / Gavėjas'] = df['Mokėtojas / Gavėjas'].fillna('Nenurodytas')
+            df['Mokėtojas / Gavėjas'] = df['Mokėtojas /\nGavėjas'].fillna('Nenurodytas')
             df['Mokėtojo / Gavėjo sąskaitos numeris, paslaugų teikėjo pavadinimas ir kodas'] = df[
                 'Mokėtojo / Gavėjo sąskaitos numeris, paslaugų teikėjo pavadinimas ir kodas'].fillna('Sąskaita nenurodyta')
             df['Mokėjimo paskirtis'] = df['Mokėjimo paskirtis'].fillna('Be paskirties')
