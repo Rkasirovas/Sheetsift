@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import re
 from flask import request, redirect, url_for, current_app, session
+from sheetsift.utils import schedule_file_deletion
 
 def analyze_siauliu():
     file = request.files['file']
@@ -105,6 +106,8 @@ def analyze_siauliu():
                 credit_final.to_excel(writer, sheet_name='Pajamos', index=False)
                 debit_final.to_excel(writer, sheet_name='Išlaidos', index=False)
                 summary_combined.reset_index().rename(columns={'index': ''}).to_excel(writer, sheet_name='Bendra', index=False)
+
+            schedule_file_deletion(result_path, delay=60)
 
             session['last_file'] = result_path
             return redirect(url_for('main.sekmingai'))

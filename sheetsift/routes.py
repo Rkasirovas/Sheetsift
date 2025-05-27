@@ -41,11 +41,15 @@ def kita():
 @main.route('/sekmingai')
 @login_required
 def sekmingai():
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+    cleanup_temp_files(upload_folder)
     return render_template('sekmingai.html')
 
 @main.route('/error')
 @login_required
 def klaida():
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+    cleanup_temp_files(upload_folder)
     return render_template('error.html')
 
 @main.route('/sekmingai/atsisiusti')
@@ -76,14 +80,3 @@ def analyze():
         return analyze_siauliu()
     else:
         return render_template('error.html')
-
-@main.route('/clean_up')
-@login_required
-def clean_up():
-    upload_folder = current_app.config['UPLOAD_FOLDER']
-    result_folder = current_app.config['RESULT_FOLDER']
-
-    cleanup_temp_files(upload_folder, result_folder)
-    session.pop('last_file', None)
-
-    return redirect(url_for('main.index'))

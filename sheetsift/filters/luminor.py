@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 from flask import request, redirect, url_for, current_app, session
+from sheetsift.utils import schedule_file_deletion
 
 def analyze_luminor():
     file = request.files['file']
@@ -94,6 +95,8 @@ def analyze_luminor():
                 credit_final.to_excel(writer, sheet_name='Pajamos', index=False)
                 debit_final.to_excel(writer, sheet_name='Išlaidos', index=False)
                 summary_combined.to_excel(writer, sheet_name='Bendra')
+
+            schedule_file_deletion(result_path, delay=60)
 
             session['last_file'] = result_path
             return redirect(url_for('main.sekmingai'))
