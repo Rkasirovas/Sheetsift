@@ -19,7 +19,7 @@ login_manager.login_message_category = 'info'
 def page_not_found(e):
     return render_template('404.html'), 404
 
-def create_app(config=None):
+def create_app(config=None, testing=False):
     app = Flask(__name__)
     app.secret_key = 'secret_key*#'
 
@@ -29,16 +29,20 @@ def create_app(config=None):
     db.init_app(app)
     login_manager.init_app(app)
     bcrypt.init_app(app)
-    admin.init_app(app)
 
-    from .models import User, SecureUserAdmin
+    if not testing:
+        admin.init_app(app)
+        from .models import User, SecureUserAdmin
+        admin.add_view(SecureUserAdmin(User, db.session))
+
     from .routes import main
     from .auth import auth
 
-    admin.add_view(SecureUserAdmin(User, db.session))
+    if 'main' not in app.blueprints:
+        app.register_blueprint(main)
 
-    app.register_blueprint(main)
-    app.register_blueprint(auth)
+    if 'auth' not in app.blueprints:
+        app.register_blueprint(auth)
 
     app.register_error_handler(404, page_not_found)
 
