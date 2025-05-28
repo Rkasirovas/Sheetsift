@@ -58,7 +58,7 @@ def atsisiusti():
     file_path = session.get('last_file')
     if file_path and os.path.exists(file_path):
         return send_file(file_path, as_attachment=True)
-    return redirect(url_for('main.klaida'))
+    return render_template('404.html')
 
 @main.route('/analyze', methods=['POST'])
 @login_required
