@@ -16,7 +16,7 @@ class User(UserMixin, db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 class AdminAccessView(ModelView):
@@ -39,4 +39,5 @@ class SecureUserAdmin(AdminAccessView):
         if form.new_password.data:
             model.password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
 
-
+    def is_visible(self):
+        return False

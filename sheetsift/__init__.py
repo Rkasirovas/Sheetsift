@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from flask_admin import Admin
+import uuid
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -30,10 +31,12 @@ def create_app(config=None, testing=False):
     login_manager.init_app(app)
     bcrypt.init_app(app)
 
-    if not testing:
+    if not testing and not getattr(app, 'admin_initialized', False):
         admin.init_app(app)
         from .models import User, SecureUserAdmin
-        admin.add_view(SecureUserAdmin(User, db.session))
+        unique_id = str(uuid.uuid4())
+        admin.add_view(SecureUserAdmin(User, db.session, endpoint=f"user_{unique_id}", url=f"/user_{unique_id}"))
+        app.admin_initialized = True
 
     from .routes import main
     from .auth import auth

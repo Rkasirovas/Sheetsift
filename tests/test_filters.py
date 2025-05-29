@@ -1455,3 +1455,122 @@ def test_siauliu_no_file_uploaded_redirects(client):
     if response.status_code == 302:
         assert '/klaida' in response.location or '/error' in response.location
 
+def test_swedbank_success(client):
+    from sheetsift.models import User
+    from sheetsift import bcrypt
+    from unittest.mock import patch
+    hashed_pw = bcrypt.generate_password_hash('testpass').decode('utf-8')
+    user = User(id=1, username='testuser1', password=hashed_pw)
+    from sheetsift import db
+    db.session.add(user)
+    db.session.commit()
+    client.post('/login', data={'username': 'testuser1', 'password': 'testpass'})
+
+    df = pd.DataFrame({
+        'Data': ['2024-01-01'],
+        'Gavėjas / Siuntėjas': ['Jonas'],
+        'Gavėjo / Siuntėjo sąskaitos nr.': ['LT123456789'],
+        'Sąskaitos Nr.': ['LT987654321'],
+        'Detalės': ['Testinis pavedimas'],
+        'Operacijos tipas': ['įplaukos'],
+        'Suma': [100.0]
+    })
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
+        tmp_path = tmp_file.name
+    df.to_excel(tmp_path, index=False)
+
+    try:
+        with patch('sheetsift.filters.swedbank.schedule_file_deletion') as mock_delete:
+            with open(tmp_path, 'rb') as f:
+                data = {'file': (f, 'swedbank_test.xlsx'), 'bank': 'swedbank'}
+                response = client.post('/analyze', data=data, content_type='multipart/form-data', follow_redirects=False)
+
+            assert response.status_code == 302
+            assert '/sekmingai' in response.location
+
+            with client.session_transaction() as sess:
+                assert 'last_file' in sess
+                assert sess['last_file'].endswith('.xlsx')
+
+            mock_delete.assert_called_once()
+    finally:
+        os.remove(tmp_path)
+
+def test_swedbank_missing_columns_redirects(client):
+    from sheetsift.models import User
+    from sheetsift import bcrypt
+    hashed_pw = bcrypt.generate_password_hash('testpass').decode('utf-8')
+    user = User(id=2, username='testuser2', password=hashed_pw)
+    from sheetsift import db
+    db.session.add(user)
+    db.session.commit()
+    client.post('/login', data={'username': 'testuser2', 'password': 'testpass'})
+
+    df = pd.DataFrame({
+        'Kitas Stulpelis': [1],
+        'Dar Vienas': [2]
+    })
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
+        tmp_path = tmp_file.name
+    df.to_excel(tmp_path, index=False)
+
+    try:
+        with open(tmp_path, 'rb') as f:
+            data = {'file': (f, 'swedbank_invalid.xlsx'), 'bank': 'swedbank'}
+            response = client.post('/analyze', data=data, content_type='multipart/form-data', follow_redirects=False)
+
+        assert response.status_code == 302
+        assert '/klaida' in response.location or '/error' in response.location
+    finally:
+        os.remove(tmp_path)
+
+def test_swedbank_corrupted_file_redirects(client):
+    from sheetsift.models import User
+    from sheetsift import bcrypt
+    hashed_pw = bcrypt.generate_password_hash('testpass').decode('utf-8')
+    user = User(id=3, username='testuser3', password=hashed_pw)
+    from sheetsift import db
+    db.session.add(user)
+    db.session.commit()
+    client.post('/login', data={'username': 'testuser3', 'password': 'testpass'})
+
+    data = {'file': (io.BytesIO(b'not an excel file'), 'swedbank_corrupted.xlsx'), 'bank': 'swedbank'}
+    response = client.post('/analyze', data=data, content_type='multipart/form-data', follow_redirects=False)
+
+    assert response.status_code == 302
+    assert '/klaida' in response.location or '/error' in response.location
+
+def test_swedbank_wrong_extension_redirects(client):
+    from sheetsift.models import User
+    from sheetsift import bcrypt
+    hashed_pw = bcrypt.generate_password_hash('testpass').decode('utf-8')
+    user = User(id=4, username='testuser4', password=hashed_pw)
+    from sheetsift import db
+    db.session.add(user)
+    db.session.commit()
+    client.post('/login', data={'username': 'testuser4', 'password': 'testpass'})
+
+    data = {'file': (io.BytesIO(b'some text content'), 'swedbank_test.txt'), 'bank': 'swedbank'}
+    response = client.post('/analyze', data=data, content_type='multipart/form-data', follow_redirects=False)
+
+    assert response.status_code == 302
+    assert '/klaida' in response.location or '/error' in response.location
+
+def test_swedbank_no_file_uploaded_redirects(client):
+    from sheetsift.models import User
+    from sheetsift import bcrypt
+    hashed_pw = bcrypt.generate_password_hash('testpass').decode('utf-8')
+    user = User(id=5, username='testuser5', password=hashed_pw)
+    from sheetsift import db
+    db.session.add(user)
+    db.session.commit()
+    client.post('/login', data={'username': 'testuser5', 'password': 'testpass'})
+
+    response = client.post('/analyze', data={'bank': 'swedbank'}, content_type='multipart/form-data', follow_redirects=False)
+
+    assert response.status_code == 302 or response.status_code == 400
+    if response.status_code == 302:
+        assert '/klaida' in response.location or '/error' in response.location
+
