@@ -4,12 +4,6 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
-<style>
-    .upload-box.highlight {
-        border-color: #2980c3;
-        background-color: #e8f4fc;
-    }
-</style>
 {% endblock %}
 
 {% block content %}
@@ -30,7 +24,7 @@
             <input type="radio" id="revolut" name="bank" value="revolut" hidden>
             <label for="revolut" class="bank-label">Revolut</label>
             <input type="radio" id="siauliubankas" name="bank" value="siauliubankas" hidden>
-            <label for="siauliubankas" class="bank-label">Šiaulių bankas</label>
+            <label for="siauliubankas" class="bank-label">Artea</label>
         </div>
     </section>
 

@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 import os
 from flask import request, redirect, url_for, current_app, session
 from sheetsift.utils import schedule_file_deletion
@@ -26,47 +27,41 @@ def analyze_luminor():
 
             df["METAI"] = pd.to_datetime(df["Operacijos data"], errors="coerce").dt.year
             df['Mokėtojas / Gavėjas'] = df['Mokėtojas /\nGavėjas'].fillna('Nenurodytas')
-            df['Mokėtojo / Gavėjo sąskaitos numeris, paslaugų teikėjo pavadinimas ir kodas'] = df[
-                'Mokėtojo / Gavėjo sąskaitos numeris, paslaugų teikėjo pavadinimas ir kodas'].fillna('Sąskaita nenurodyta')
             df['Mokėjimo paskirtis'] = df['Mokėjimo paskirtis'].fillna('Be paskirties')
 
-            credit_df = df[df['Suma nac. valiuta (kreditas)'].notna()].copy()
+            def extract_account(text):
+                match = re.search(r'(LT\d{18})', text)
+                return match.group(0) if match else text
 
+            df['Mokėtojo/Gavėjo sąskaita'] = df['Mokėtojo / Gavėjo sąskaitos numeris, paslaugų teikėjo pavadinimas ir kodas'].apply(extract_account)
+
+            credit_df = df[df['Suma nac. valiuta (kreditas)'].notna()].copy()
             credit_pivot = credit_df.pivot_table(
-                index=['Mokėtojas / Gavėjas', 'Mokėtojo / Gavėjo sąskaitos numeris, paslaugų teikėjo pavadinimas ir kodas'],
+                index=['Mokėtojas / Gavėjas', 'Mokėtojo/Gavėjo sąskaita'],
                 columns='METAI', values='Suma nac. valiuta (kreditas)', aggfunc='sum', fill_value=0).reset_index()
 
-            credit_reasons = credit_df.groupby(
-                ['Mokėtojas / Gavėjas', 'Mokėtojo / Gavėjo sąskaitos numeris, paslaugų teikėjo pavadinimas ir kodas'])[
-                'Mokėjimo paskirtis'].apply(lambda x: ' ||\n'.join(sorted(set(x)))).reset_index()
+            credit_reasons = credit_df.groupby(['Mokėtojas / Gavėjas', 'Mokėtojo/Gavėjo sąskaita'])['Mokėjimo paskirtis'] \
+                .apply(lambda x: ' ||\n'.join(sorted(set(x)))).reset_index()
 
-            credit_final = pd.merge(credit_pivot, credit_reasons,
-                                    on=['Mokėtojas / Gavėjas',
-                                        'Mokėtojo / Gavėjo sąskaitos numeris, paslaugų teikėjo pavadinimas ir kodas'])
-
+            credit_final = pd.merge(credit_pivot, credit_reasons, on=['Mokėtojas / Gavėjas', 'Mokėtojo/Gavėjo sąskaita'])
             credit_final = credit_final.rename(columns={
                 'Mokėtojas / Gavėjas': 'MOKĖTOJAS',
-                'Mokėtojo / Gavėjo sąskaitos numeris, paslaugų teikėjo pavadinimas ir kodas': 'MOKĖTOJO SĄSKAITA',
+                'Mokėtojo/Gavėjo sąskaita': 'MOKĖTOJO SĄSKAITA',
                 'Mokėjimo paskirtis': 'MOKĖJIMO PASKIRTIS'
             })
 
             debit_df = df[df['Suma nac. valiuta (debetas)'].notna()].copy()
-
             debit_pivot = debit_df.pivot_table(
-                index=['Mokėtojas / Gavėjas', 'Mokėtojo / Gavėjo sąskaitos numeris, paslaugų teikėjo pavadinimas ir kodas'],
+                index=['Mokėtojas / Gavėjas', 'Mokėtojo/Gavėjo sąskaita'],
                 columns='METAI', values='Suma nac. valiuta (debetas)', aggfunc='sum', fill_value=0).reset_index()
 
-            debit_reasons = debit_df.groupby(
-                ['Mokėtojas / Gavėjas', 'Mokėtojo / Gavėjo sąskaitos numeris, paslaugų teikėjo pavadinimas ir kodas'])[
-                'Mokėjimo paskirtis'].apply(lambda x: ' ||\n'.join(sorted(set(x)))).reset_index()
+            debit_reasons = debit_df.groupby(['Mokėtojas / Gavėjas', 'Mokėtojo/Gavėjo sąskaita'])['Mokėjimo paskirtis'] \
+                .apply(lambda x: ' ||\n'.join(sorted(set(x)))).reset_index()
 
-            debit_final = pd.merge(debit_pivot, debit_reasons,
-                                    on=['Mokėtojas / Gavėjas',
-                                        'Mokėtojo / Gavėjo sąskaitos numeris, paslaugų teikėjo pavadinimas ir kodas'])
-
+            debit_final = pd.merge(debit_pivot, debit_reasons, on=['Mokėtojas / Gavėjas', 'Mokėtojo/Gavėjo sąskaita'])
             debit_final = debit_final.rename(columns={
-                'Mokėtojas / Gavėjas': 'MOKĖTOJAS',
-                'Mokėtojo / Gavėjo sąskaitos numeris, paslaugų teikėjo pavadinimas ir kodas': 'MOKĖTOJO SĄSKAITA',
+                'Mokėtojas / Gavėjas': 'GAVĖJAS',
+                'Mokėtojo/Gavėjo sąskaita': 'GAVĖJO SĄSKAITA',
                 'Mokėjimo paskirtis': 'MOKĖJIMO PASKIRTIS'
             })
 
@@ -90,7 +85,7 @@ def analyze_luminor():
 
             summary_combined = pd.concat([credit_df_row, debit_df_row])
 
-            result_path = os.path.join(current_app.config['RESULT_FOLDER'], 'Apdoroti_Išrasai_Luminor.xlsx')
+            result_path = os.path.join(current_app.config['RESULT_FOLDER'], 'Apdoroti_Israsai_Luminor.xlsx')
             with pd.ExcelWriter(result_path, engine='xlsxwriter') as writer:
                 credit_final.to_excel(writer, sheet_name='Pajamos', index=False)
                 debit_final.to_excel(writer, sheet_name='Išlaidos', index=False)
