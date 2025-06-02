@@ -120,12 +120,3 @@ Configuration is set in `run.py` using the `config` dictionary:
 ## 🙋 About
 
 SheetSift was created as a final assignment by [Rkasirovas](https://github.com/Rkasirovas).
-
----
-
-## 📄 License
-
-Distributed under the MIT License.
-
-
-*This project was created as a final assignment by [Rkasirovas](https://github.com/Rkasirovas).*
