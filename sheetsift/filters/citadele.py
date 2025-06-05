@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+import re
 from flask import request, redirect, url_for, current_app, session
 from sheetsift.utils import schedule_file_deletion
 
@@ -31,10 +32,11 @@ def analyze_citadele():
                 df["METAI"] = pd.to_datetime(df["OFS.DATE"].astype(str), format='%Y%m%d', errors='coerce').dt.year
                 df['ASMENS SĄSKAITA'] = df['IBAN']
                 df['MOKĖTOJAS/GAVĖJAS'] = df['OFS.CNP.NAME'].fillna('Nenurodytas')
+                df['MOKĖTOJO/GAVĖJO SĄSKAITA'] = df['OFS.CNP.ACCT'].fillna('Sąskaita nenurodyta')
                 df['MOKĖJIMO PASKIRTIS'] = df['OFS.NARRATIVE'].fillna('Be paskirties')
                 df['PAJAMOS'] = df.apply(lambda x: x['OFS.AMOUNT'] if x['SIGN'] == 'CR' else 0, axis=1)
                 df['IŠLAIDOS'] = df.apply(lambda x: abs(x['OFS.AMOUNT']) if x['SIGN'] == 'DR' else 0, axis=1)
-                df = df[['METAI', 'ASMENS SĄSKAITA', 'MOKĖTOJAS/GAVĖJAS', 'MOKĖJIMO PASKIRTIS', 'PAJAMOS', 'IŠLAIDOS']]
+                df = df[['METAI', 'ASMENS SĄSKAITA', 'MOKĖTOJAS/GAVĖJAS', 'MOKĖTOJO/GAVĖJO SĄSKAITA', 'MOKĖJIMO PASKIRTIS', 'PAJAMOS', 'IŠLAIDOS']]
 
             elif 'Data' and 'DR' and 'CR' in columns:
                 selection = 'lt'
@@ -55,6 +57,14 @@ def analyze_citadele():
 
                 df['MOKĖJIMO PASKIRTIS'] = df['Operacijos numeris ir paskirtis'].fillna('Be paskirties')
                 df['MOKĖTOJO/GAVĖJO SĄSKAITA'] = df['Operacijos numeris ir paskirtis'].str.extract(r'(LT\d{18})')
+
+                def extract_name(text):
+                    match = re.search(r'LT\d{18}\s+(.*?)(?=\s+\d{6,}|\s+BIC:| dok\.Nr\.|$)', str(text))
+                    if match:
+                        return match.group(1).strip()
+                    return 'Nenurodytas'
+
+                df['MOKĖTOJAS/GAVĖJAS'] = df['Operacijos numeris ir paskirtis'].apply(extract_name)
                 df['MOKĖTOJO/GAVĖJO SĄSKAITA'] = df['MOKĖTOJO/GAVĖJO SĄSKAITA'].fillna('Sąskaita nerasta')
                 df['DR'] = pd.to_numeric(df['DR'], errors='coerce').fillna(0)
                 df['CR'] = pd.to_numeric(df['CR'], errors='coerce').fillna(0)
@@ -64,7 +74,7 @@ def analyze_citadele():
             else:
                 return redirect(url_for('main.klaida'))
 
-            if selection in ['en_account', 'en_iban']:
+            if selection == 'en_account':
 
                 credit_df = df[df['PAJAMOS'] > 0]
                 debit_df = df[df['IŠLAIDOS'] > 0]
@@ -117,30 +127,87 @@ def analyze_citadele():
 
                 summary_combined = pd.concat(summary_list)
 
+            elif selection == 'en_iban':
+
+                credit_df = df[df['PAJAMOS'] > 0]
+                debit_df = df[df['IŠLAIDOS'] > 0]
+
+                credit_pivot = credit_df.pivot_table(
+                    index=['ASMENS SĄSKAITA', 'MOKĖTOJAS/GAVĖJAS', 'MOKĖTOJO/GAVĖJO SĄSKAITA'],
+                    columns='METAI', values='PAJAMOS', aggfunc='sum', fill_value=0).reset_index()
+
+                credit_reasons = credit_df.groupby(['ASMENS SĄSKAITA', 'MOKĖTOJAS/GAVĖJAS', 'MOKĖTOJO/GAVĖJO SĄSKAITA'])['MOKĖJIMO PASKIRTIS'] \
+                    .apply(lambda x: ' ||\n'.join(sorted(set(x)))).reset_index()
+
+                credit_final = pd.merge(credit_pivot, credit_reasons, on=['ASMENS SĄSKAITA', 'MOKĖTOJAS/GAVĖJAS', 'MOKĖTOJO/GAVĖJO SĄSKAITA'])
+                credit_final = credit_final.rename(columns={'MOKĖTOJAS/GAVĖJAS': 'MOKĖTOJAS',
+                                                            'MOKĖTOJO/GAVĖJO SĄSKAITA': 'MOKĖTOJO SĄSKAITA'})
+
+                debit_pivot = debit_df.pivot_table(
+                    index=['ASMENS SĄSKAITA', 'MOKĖTOJAS/GAVĖJAS', 'MOKĖTOJO/GAVĖJO SĄSKAITA'],
+                    columns='METAI', values='IŠLAIDOS', aggfunc='sum', fill_value=0).reset_index()
+
+                debit_reasons = debit_df.groupby(['ASMENS SĄSKAITA', 'MOKĖTOJAS/GAVĖJAS', 'MOKĖTOJO/GAVĖJO SĄSKAITA'])['MOKĖJIMO PASKIRTIS'] \
+                    .apply(lambda x: ' ||\n'.join(sorted(set(x)))).reset_index()
+
+                debit_final = pd.merge(debit_pivot, debit_reasons, on=['ASMENS SĄSKAITA', 'MOKĖTOJAS/GAVĖJAS', 'MOKĖTOJO/GAVĖJO SĄSKAITA'])
+                debit_final = debit_final.rename(columns={'MOKĖTOJAS/GAVĖJAS': 'GAVĖJAS',
+                                                          'MOKĖTOJO/GAVĖJO SĄSKAITA': 'GAVĖJO SĄSKAITA'})
+
+                all_years = sorted(df['METAI'].dropna().unique())
+                all_years = [int(y) for y in all_years]
+
+                summary_list = []
+
+                for account in df['ASMENS SĄSKAITA'].dropna().unique():
+                    account_credit = credit_df[credit_df['ASMENS SĄSKAITA'] == account]
+                    account_debit = debit_df[debit_df['ASMENS SĄSKAITA'] == account]
+
+                    credit_summary = account_credit.groupby('METAI')['PAJAMOS'].sum()
+                    debit_summary = account_debit.groupby('METAI')['IŠLAIDOS'].sum()
+
+                    credit_row = [credit_summary.get(year, 0) for year in all_years]
+                    debit_row = [debit_summary.get(year, 0) for year in all_years]
+
+                    credit_total = sum(credit_row)
+                    debit_total = sum(debit_row)
+
+                    credit_df_row = pd.DataFrame([credit_row + [credit_total]], columns=all_years + ['Viso'],
+                                                 index=[f'{account} Bendros Pajamos'])
+                    debit_df_row = pd.DataFrame([debit_row + [debit_total]], columns=all_years + ['Viso'],
+                                                index=[f'{account} Bendros Išlaidos'])
+
+                    summary_list.append(credit_df_row)
+                    summary_list.append(debit_df_row)
+
+                summary_combined = pd.concat(summary_list)
+
             elif selection == 'lt':
 
                 credit_df = df[df['PAJAMOS'] > 0]
                 debit_df = df[df['IŠLAIDOS'] > 0]
 
                 credit_pivot = credit_df.pivot_table(
-                    index=['MOKĖTOJO/GAVĖJO SĄSKAITA'],
+                    index=['MOKĖTOJAS/GAVĖJAS', 'MOKĖTOJO/GAVĖJO SĄSKAITA'],
                     columns='METAI', values='PAJAMOS', aggfunc='sum', fill_value=0).reset_index()
 
-                credit_reasons = credit_df.groupby(['MOKĖTOJO/GAVĖJO SĄSKAITA'])['MOKĖJIMO PASKIRTIS'] \
+                credit_reasons = credit_df.groupby(['MOKĖTOJAS/GAVĖJAS', 'MOKĖTOJO/GAVĖJO SĄSKAITA'])['MOKĖJIMO PASKIRTIS'] \
                     .apply(lambda x: ' ||\n'.join(sorted(set(x)))).reset_index()
 
-                credit_final = pd.merge(credit_pivot, credit_reasons, on=['MOKĖTOJO/GAVĖJO SĄSKAITA'])
-                credit_final = credit_final.rename(columns={'MOKĖTOJO/GAVĖJO SĄSKAITA': 'MOKĖTOJO SĄSKAITA'})
+                credit_final = pd.merge(credit_pivot, credit_reasons, on=['MOKĖTOJAS/GAVĖJAS', 'MOKĖTOJO/GAVĖJO SĄSKAITA'])
+                credit_final = credit_final.rename(columns={'MOKĖTOJO/GAVĖJO SĄSKAITA': 'MOKĖTOJO SĄSKAITA',
+                                                            'MOKĖTOJAS/GAVĖJAS': 'MOKĖTOJAS'})
 
                 debit_pivot = debit_df.pivot_table(
-                    index=['MOKĖTOJO/GAVĖJO SĄSKAITA'],
+                    index=['MOKĖTOJAS/GAVĖJAS', 'MOKĖTOJO/GAVĖJO SĄSKAITA'],
                     columns='METAI', values='IŠLAIDOS', aggfunc='sum', fill_value=0).reset_index()
 
-                debit_reasons = debit_df.groupby(['MOKĖTOJO/GAVĖJO SĄSKAITA'])['MOKĖJIMO PASKIRTIS'] \
+                debit_reasons = debit_df.groupby(['MOKĖTOJAS/GAVĖJAS', 'MOKĖTOJO/GAVĖJO SĄSKAITA'])['MOKĖJIMO PASKIRTIS'] \
                     .apply(lambda x: ' ||\n'.join(sorted(set(x)))).reset_index()
 
-                debit_final = pd.merge(debit_pivot, debit_reasons, on=['MOKĖTOJO/GAVĖJO SĄSKAITA'])
-                debit_final = debit_final.rename(columns={'MOKĖTOJO/GAVĖJO SĄSKAITA': 'GAVĖJO SĄSKAITA'})
+                debit_final = pd.merge(debit_pivot, debit_reasons, on=['MOKĖTOJAS/GAVĖJAS', 'MOKĖTOJO/GAVĖJO SĄSKAITA'])
+                debit_final = debit_final.rename(columns={'MOKĖTOJO/GAVĖJO SĄSKAITA': 'GAVĖJO SĄSKAITA',
+                                                          'MOKĖTOJAS/GAVĖJAS': 'GAVĖJAS'})
 
                 all_years = sorted(df['METAI'].dropna().unique())
                 all_years = [int(y) for y in all_years]

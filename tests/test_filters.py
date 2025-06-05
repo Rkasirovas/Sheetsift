@@ -161,6 +161,7 @@ def test_citadele_en_iban_format(client):
         'IBAN': ['LT123456789012345678'],
         'OFS.DATE': [20240101],
         'OFS.CNP.NAME': ['Jonas'],
+        'OFS.CNP.ACCT': ['LT123'],
         'OFS.NARRATIVE': ['Paslauga'],
         'OFS.AMOUNT': [250.0],
         'SIGN': ['CR'],
@@ -1574,3 +1575,43 @@ def test_swedbank_no_file_uploaded_redirects(client):
     if response.status_code == 302:
         assert '/klaida' in response.location or '/error' in response.location
 
+def test_citadele_extract_name_returns_default(client):
+    from sheetsift.models import User
+    from sheetsift import bcrypt
+
+    hashed_pw = bcrypt.generate_password_hash('testpass').decode('utf-8')
+    user = User(id=100, username='testuser100', password=hashed_pw)
+    db.session.add(user)
+    db.session.commit()
+    client.post('/login', data={'username': 'testuser100', 'password': 'testpass'})
+
+    df = pd.DataFrame({
+        'Data': ['2024-01-01'],
+        'Operacijos numeris ir paskirtis': ['LT123456789012345678'],
+        'DR': [0.0],
+        'CR': [100.0]
+    })
+
+    fd, tmp_path = tempfile.mkstemp(suffix='.xlsx')
+    os.close(fd)
+    df.to_excel(tmp_path, index=False)
+
+    try:
+        with patch('sheetsift.filters.citadele.schedule_file_deletion') as mock_delete:
+            with open(tmp_path, 'rb') as f:
+                data = {'file': (f, 'testas_extractname.xlsx'), 'bank': 'citadele'}
+                response = client.post('/analyze', data=data, content_type='multipart/form-data')
+
+            assert response.status_code == 302
+            assert '/sekmingai' in response.location
+
+            with client.session_transaction() as sess:
+                result_path = sess['last_file']
+                assert os.path.exists(result_path)
+
+                result_df = pd.read_excel(result_path, sheet_name='Pajamos')
+                assert 'Nenurodytas' in result_df['MOKĖTOJAS'].values
+
+            mock_delete.assert_called_once()
+    finally:
+        os.remove(tmp_path)
