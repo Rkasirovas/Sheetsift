@@ -65,7 +65,7 @@ def test_secure_user_admin_is_visible():
     from sheetsift import db
     view = SecureUserAdmin(User, db.session)
 
-    assert view.is_visible() is False
+    assert view.is_visible() is True
 
 def test_on_model_change_updates_password():
     from sheetsift.models import SecureUserAdmin, User
