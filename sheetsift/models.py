@@ -40,4 +40,4 @@ class SecureUserAdmin(AdminAccessView):
             model.password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
 
     def is_visible(self):
-        return False
+        return True
