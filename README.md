@@ -63,8 +63,8 @@ uploads/, results/            # (Created at runtime) File storage
 ### Installation
 
 ```bash
-git clone https://github.com/Rkasirovas/sheetsift.git
-cd sheetsift
+git clone https://github.com/Rkasirovas/Sheetsift.git
+cd Sheetsift
 
 # (Optional) Create and activate a virtual environment
 python -m venv venv
